@@ -1,0 +1,217 @@
+% Proyecto de Sistemas expertos
+% Equipo: Carlos Andrei Saucedo Aguilar, Erick Zaid Medina Torres
+
+:- dynamic campeon/8.
+% Cargar campeones desde el archivo
+cargar_campeones :-
+    exists_file('campeones.db'),  % Verifica si el archivo existe
+    open('campeones.db',read, Stream),
+    leer_campeones(Stream),
+    close(Stream),
+    write('Campeones cargados desde campeones.db.'), nl.
+
+cargar_campeones :-
+    write('No se encontró un archivo de campeones previos.'), nl.
+
+% Leer campeones desde el archivo
+leer_campeones(Stream):-
+    read(Stream, Term),
+    (   Term == end_of_file
+    -> true
+    ; assert(Term), % Insertar el hecho dinamicamente en la base de datos
+    leer_campeones(Stream)).
+
+% Guardar un nuevo campeón en el archivo
+guardar_campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad) :-
+    open('campeones.db', append, Stream),  % Abre el archivo en modo de añadir
+    write(Stream, campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad)),  % Escribe el nuevo campeón
+    write(Stream, '.'), nl(Stream),  % Asegura que se escriba el punto final
+    close(Stream).  % Cierra el archivo
+
+
+% Definición de campeones
+campeon(ahri, fuerte, femenino, mago, jonia, mid, vastaya, medio).
+campeon(aatrox, viable, masculino, luchador, shurima, top, darkin, alta).
+campeon(ashe, fuerte, femenino, tirador, freljord, bot, humano, media).
+campeon(alistar, viable, masculino, support, runaterra, soporte, vastaya, media).
+campeon(amumu, fuerte, masculino, tanque, shurima, jungla, yordle, baja).
+campeon(anivia, viable, femenino, mago, freljord, mid, espiritu, alta).
+campeon(akali, fuerte, femenino, asesino, jonia, mid, humano, alta).
+campeon(azir, viable, masculino, mago, shurima, mid, ascendido, alta).
+campeon(bard, fuerte, masculino, support, targon, soporte, celestial, media).
+campeon(caitlyn, fuerte, femenino, tirador, piltover, bot, humano, media).
+campeon(camille, viable, femenino, luchador, piltover, top, cyborg, alta).
+campeon(cassiopeia, fuerte, femenino, mago, noxus, mid, humano, alta).
+campeon(darius, fuerte, masculino, luchador, noxus, top, humano, media).
+campeon(diana, viable, femenino, luchador, targon, jungla, humano, alta).
+campeon(draven, fuerte, masculino, tirador, noxus, bot, humano, media).
+campeon(ekko, viable, masculino, asesino, zaun, jungla, humano, media).
+campeon(evelynn, fuerte, femenino, asesino, runaterra, jungla, demonio, alta).
+campeon(ezreal, fuerte, masculino, tirador, piltover, bot, humano, media).
+campeon(fiora, viable, femenino, luchador, demacia, top, humano, alta).
+campeon(fizz, fuerte, masculino, asesino, aguasturbias, mid, yordle, media).
+campeon(garen, viable, masculino, tanque, demacia, top, humano, baja).
+campeon(jhin, fuerte, masculino, tirador, jonia, bot, humano, alta).
+campeon(jinx, fuerte, femenino, tirador, zaun, bot, humano, media).
+campeon(kaisa, fuerte, femenino, tirador, vacio, bot, hibrido, alta).
+campeon(kassadin, viable, masculino, asesino, vacio, mid, humano, alta).
+campeon(katarina, viable, femenino, asesino, noxus, mid, humano, alta).
+campeon(leona, fuerte, femenino, support, targon, soporte, humano, media).
+campeon(lucian, fuerte, masculino, tirador, demacia, bot, humano, media).
+campeon(lissandra, viable, femenino, mago, freljord, mid, espiritu, alta).
+campeon(malphite, fuerte, masculino, tanque, runaterra, top, golem, baja).
+
+
+
+% Preguntar características del campeón
+preguntar(genero, Respuesta):-
+    write('¿Es masculino o femenino? '), nl,
+    read(Respuesta).
+
+preguntar(rol, Respuesta):-
+    write('¿Qué rol es el campeón? '), nl,
+    write('mago, luchador, tirador, tanque, asesino, support '), nl,
+    read(Respuesta).
+
+preguntar(region, Respuesta):-
+    write('¿De qué región es tu campeón? '), nl,
+    write('freljord, jonia, demacia, vacio, piltover, targon, noxus, shurima, runaterra, zaun, aguasturbias '), nl,
+    read(Respuesta).
+
+preguntar(fuerza, Respuesta):-
+    write('¿Tu campeón es fuerte o viable? '), nl,
+    read(Respuesta).
+
+preguntar(linea, Respuesta):-
+    write('¿En qué línea se juega? (top, jungla, mid, bot, soporte) '), nl,
+    read(Respuesta).
+
+preguntar(raza, Respuesta):-
+    write('¿De qué raza es tu campeón? '), nl,
+    write('Humano, vastaya, darkin, yordle, hibrido, cyborg, ascendido, espiritu, golem, demonio, celestial '), nl,
+    read(Respuesta).
+
+preguntar(dificultad, Respuesta):-
+    write('¿Cuál es la dificultad del campeón? (baja, media, alta): '), nl,
+    read(Respuesta).
+
+% Adivinar campeón
+adivinar_campeon :-
+    write('Bienvenido al adivina adivinador '), nl,
+    write('Adivinemos algún campeón del LoL '), nl,
+    preguntar(genero, Genero),
+    preguntar(rol, Rol),
+    preguntar(region, Region),
+    preguntar(fuerza, Fuerza),
+    preguntar(linea, Linea),
+    preguntar(raza, Raza),
+    preguntar(dificultad, Dificultad),
+    suponer_campeon(Genero, Rol, Region, Fuerza, Linea, Raza, Dificultad).
+
+suponer_campeon(Genero, Rol, Region, Fuerza, Linea, Raza, Dificultad) :-
+    campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad),
+    write('¿Tu campeón es '), write(Nombre), write('? (si/no) '), nl,
+    read(Respuesta),
+    (   Respuesta == si
+    ->  write('¡Adiviné correctamente!'), nl,
+        preguntar_reiniciar
+    ;   write('No adiviné correctamente. ¿Quieres agregar este nuevo campeón? (si/no) '), nl,
+        read(Agregar),
+        (   Agregar == si
+        ->  aprender_campeon_interactivo(Genero, Rol, Region, Fuerza, Linea, Raza, Dificultad)
+        ;   write('Gracias por jugar.'), nl
+        )
+    ).
+
+% Preguntar si se quiere agregar el campeón cuando no se adivina
+aprender_campeon_interactivo(Genero, Rol, Region, Fuerza, Linea, Raza, Dificultad) :-
+    write('¿Cómo se llama el nuevo campeón? '), nl,
+    read(Nombre),
+    assert(campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad)),
+    guardar_campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad),
+    write('Campeón añadido a la base de datos.'), nl,
+    preguntar_reiniciar.
+
+
+% Preguntar si se quiere reiniciar
+preguntar_reiniciar :-
+    write('¿Quieres empezar de nuevo? (si/no): '), nl,
+    read(Respuesta),
+    (   Respuesta == si
+    ->  adivinar_campeon  % Reiniciar el juego
+    ;   write('Gracias por jugar'), nl, halt).  % Terminar el programa
+
+% Iniciar el sistema y cargar campeones
+:- initialization(iniciar).
+
+iniciar :-
+    cargar_campeones,  % Cargar campeones desde el archivo al iniciar
+    write('Bienvenido ¿Qué desea hacer? '), nl,
+    write('1. Agregar campeón '), nl,
+    write('2. Jugar a adivinar el campeón '), nl,
+    write('3. Salir '), nl,
+    write('Selecciona: '), nl,
+    read(Opcion),
+    ejecutar_opcion(Opcion).
+
+% Manejar las opciones del menú principal
+ejecutar_opcion(1):-
+    agregar_campeon,
+    iniciar.
+
+ejecutar_opcion(2):-
+    adivinar_campeon.
+
+ejecutar_opcion(3):-
+    write('Gracias por jugar '), nl,
+    halt.
+
+ejecutar_opcion(_):-
+    write('Selección inválida '), nl,
+    iniciar.
+
+% Agregar un nuevo campeón
+agregar_campeon :-
+    write('Agregando nuevo campeón '), nl,
+    write('¿Cuál es el nombre? '), nl,
+    read(Nombre),
+    (   campeon(Nombre, _, _, _, _, _, _, _)  % Verifica si ya existe en la base de datos dinámica
+    ->  write('Error: El campeón ya existe en la base de datos.'), nl  % No lo agrega si ya existe
+    ;   write('¿Es fuerte o viable? '), nl,
+        read(Fuerza),
+        write('¿Es masculino o femenino? '), nl,
+        read(Genero),
+        write('¿Qué rol tiene el campeón? (mago, luchador, tirador, tanque, asesino, support): '), nl,
+        read(Rol),
+        write('¿De qué región es? '), nl,
+        write('freljord, jonia, demacia, vacio, piltover, targon, noxus, shurima, runaterra, zaun, aguasturbias '), nl,
+        read(Region),
+        write('¿En qué línea se juega? (top, jungla, mid, bot, soporte): '), nl,
+        read(Linea),
+        write('¿De qué raza es tu campeón? '), nl,
+        write('Humano, vastaya, darkin, yordle, hibrido, cyborg, ascendido, espiritu, golem, demonio, celestial'), nl,
+        read(Raza),
+        write('¿Cuál es la dificultad del campeón? (baja, media, alta): '), nl,
+        read(Dificultad),
+        assert(campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad)),  % Solo agrega si no existe
+        guardar_campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad),  % Guarda en archivo
+        eliminar_duplicados_carga(ListaNombres),
+        write('Campeón añadido a la base de datos '), nl
+    ).
+
+
+eliminar_duplicados(Nombre):-
+    findall((Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad),
+            campeon(Nombre, Fuerza, Genero, Rol, Region, Linea, Raza, Dificultad), Lista,
+            length(Lista, N),
+            (   N > 1
+            ->   retract(campeon(Nombre, _, _, _, _, _, _, _)),
+                 write('Duplicado eliminado de la base de datos' ), nl
+            ;    true
+            )).
+
+eliminar_duplicados_carga([]).
+eliminar_duplicados_carga([Nombre|Resto]) :-
+    eliminar_duplicados(Nombre),  % Elimina duplicados de cada campeón
+    eliminar_duplicados_carga(Resto).  % Llama recursivamente para el resto de los campeones
+
